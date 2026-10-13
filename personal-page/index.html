@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星洛 · 一个社恐的普通学生</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --grad-1: #ff6b9d;
+    --grad-2: #a55eea;
+    --grad-3: #4dabf7;
+    --grad-4: #38d9a9;
+    --grad-hero: linear-gradient(135deg, #ff6b9d 0%, #a55eea 35%, #4dabf7 70%, #38d9a9 100%);
+    --ink: #2d3436;
+    --ink-soft: #636e72;
+    --card-bg: rgba(255, 255, 255, 0.85);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: #fdf6ff;
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* ===== 顶部渐变横幅 ===== */
+  .hero {
+    min-height: 100vh;
+    /* 壁纸背景 + 暗色遮罩（压暗 55% 左右，保证文字清晰） */
+    background:
+      linear-gradient(to bottom, rgba(12, 14, 30, 0.5) 0%, rgba(12, 14, 30, 0.45) 78%, #fdf6ff 100%),
+      url('bg.jpg') center / cover no-repeat fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    padding: 24px;
+  }
+
+  /* 漂浮装饰圆 */
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+    animation: floatUp 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .bubble:nth-child(1) { width: 160px; height: 160px; top: 12%; left: 8%;  animation-delay: 0s; }
+  .bubble:nth-child(2) { width: 90px;  height: 90px;  top: 65%; left: 15%; animation-delay: 1.5s; }
+  .bubble:nth-child(3) { width: 220px; height: 220px; top: 20%; right: 10%; animation-delay: 0.8s; }
+  .bubble:nth-child(4) { width: 120px; height: 120px; bottom: 10%; right: 20%; animation-delay: 2.2s; }
+
+  @keyframes floatUp {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-30px) scale(1.06); }
+  }
+
+  .avatar {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: 4px solid rgba(255,255,255,0.7);
+    overflow: hidden;
+    margin-bottom: 24px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    animation: bob 4s ease-in-out infinite;
+  }
+  .avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+
+  .hero h1 {
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    letter-spacing: 2px;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    margin-bottom: 12px;
+  }
+
+  /* 左上角蓝色调小标题 */
+  .hero-label {
+    position: absolute;
+    top: 34px;
+    left: 44px;
+    font-size: clamp(0.68rem, 1.5vw, 0.88rem);
+    letter-spacing: 3px;
+    font-weight: 600;
+    color: #7dd3fc;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+    opacity: 0.92;
+  }
+
+  /* 名字中的“星洛”用天蓝色 */
+  .sky {
+    color: #4fc3f7;
+    text-shadow: 0 0 22px rgba(79, 195, 247, 0.65), 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .location {
+    font-size: clamp(0.9rem, 2vw, 1.05rem);
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    margin-bottom: 16px;
+  }
+
+  .hero .tagline {
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    opacity: 0.95;
+    min-height: 1.8em;
+  }
+  .hero .tagline .cursor {
+    display: inline-block;
+    width: 2px; height: 1.1em;
+    background: #fff;
+    vertical-align: -0.15em;
+    margin-left: 3px;
+    animation: blink 0.8s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 28px;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    animation: bounce 2s infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(8px); }
+  }
+
+  /* ===== 内容区通用 ===== */
+  section { padding: 90px 20px; }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  .section-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 48px;
+    position: relative;
+  }
+  .section-title::after {
+    content: "";
+    display: block;
+    width: 64px; height: 5px;
+    border-radius: 3px;
+    background: var(--grad-hero);
+    margin: 14px auto 0;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: 22px;
+    padding: 36px;
+    box-shadow: 0 10px 30px rgba(165, 94, 234, 0.12);
+    backdrop-filter: blur(8px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 44px rgba(165, 94, 234, 0.22);
+  }
+
+  /* 滚动渐入 */
+  .reveal {
+    opacity: 0;
+    transform: translateY(36px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ===== 关于我 ===== */
+  .about-text { font-size: 1.08rem; color: var(--ink-soft); }
+  .about-text strong { color: var(--ink); }
+
+  .trait-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+  }
+  .trait-list li {
+    padding: 8px 18px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+  .trait-list li:nth-child(4n+1) { background: linear-gradient(135deg, #ff6b9d, #ff8e53); }
+  .trait-list li:nth-child(4n+2) { background: linear-gradient(135deg, #a55eea, #7c4dff); }
+  .trait-list li:nth-child(4n+3) { background: linear-gradient(135deg, #4dabf7, #38d9a9); }
+  .trait-list li:nth-child(4n+4) { background: linear-gradient(135deg, #ffa94d, #ff6b6b); }
+
+  /* ===== 兴趣卡片 ===== */
+  .hobby-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+  .hobby-card {
+    border-radius: 22px;
+    padding: 32px 28px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+  .hobby-card:hover { transform: translateY(-8px) scale(1.02); }
+  .hobby-card::before {
+    content: "";
+    position: absolute;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    top: -50px; right: -50px;
+  }
+  .hobby-card:nth-child(1) { background: linear-gradient(135deg, #ff6b9d, #ff8e53); }
+  .hobby-card:nth-child(2) { background: linear-gradient(135deg, #a55eea, #5f27cd); }
+  .hobby-card:nth-child(3) { background: linear-gradient(135deg, #4dabf7, #0abde3); }
+  .hobby-card:nth-child(4) { background: linear-gradient(135deg, #38d9a9, #20bf6b); }
+  .hobby-card:nth-child(5) { background: linear-gradient(135deg, #f783ac, #cc5de8); }
+  .hobby-card .icon { font-size: 2.6rem; display: block; margin-bottom: 14px; }
+  .hobby-card h3 { font-size: 1.25rem; margin-bottom: 8px; }
+  .hobby-card p { font-size: 0.94rem; opacity: 0.94; }
+
+  /* ===== 社恐统计 ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 2.6rem;
+    font-weight: 800;
+    background: var(--grad-hero);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stat-label { color: var(--ink-soft); margin-top: 6px; font-size: 0.95rem; }
+
+  /* ===== 底部 ===== */
+  footer {
+    background: linear-gradient(135deg, #2d3436, #3d4a52);
+    color: rgba(255,255,255,0.85);
+    text-align: center;
+    padding: 48px 20px;
+    font-size: 0.95rem;
+  }
+  footer .line {
+    width: 80px; height: 4px;
+    background: var(--grad-hero);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  @media (max-width: 560px) {
+    section { padding: 64px 16px; }
+    .card { padding: 26px; }
+    .hero-label { top: 20px; left: 18px; letter-spacing: 1.5px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 首屏 -->
+<header class="hero">
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+  <div class="bubble"></div>
+
+  <div class="hero-label">——HELLO,NICE TO MEET YOU</div>
+
+  <div class="avatar"><img src="avatar.jpg" alt="星洛的头像"></div>
+  <h1>HI,I'm <span class="sky">星洛</span></h1>
+  <p class="location">📍 沈阳理工大学</p>
+  <p class="tagline"><span id="typed"></span><span class="cursor"></span></p>
+  <div class="scroll-hint">往下看看 ↓</div>
+</header>
+
+<!-- 关于我 -->
+<section>
+  <div class="container">
+    <h2 class="section-title reveal">关于我</h2>
+    <div class="card reveal">
+      <p class="about-text">
+        我是一个<strong>有点社恐的普通学生</strong>。线上聊天可以滔滔不绝，
+        线下见面自动开启省电模式。虽然不太擅长主动社交，
+        但一直在用自己的方式认真生活、认真学习。
+        最近正在学习编程，用 AI 辅助做出了眼前这个页面 ——
+        <strong>对，就是这个网页，它可能比我还开朗一点。</strong>
+      </p>
+      <ul class="trait-list">
+        <li>🐢 慢热但真诚</li>
+        <li>🎧 耳机不离身</li>
+        <li>💻 编程学习中</li>
+        <li>🌙 夜型选手</li>
+        <li>🤫 安静观察者</li>
+        <li>🚀 想变更好</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 兴趣爱好 -->
+<section style="background: #fff0f6;">
+  <div class="container">
+    <h2 class="section-title reveal">我的一些小世界</h2>
+    <div class="hobby-grid">
+      <div class="hobby-card reveal">
+        <span class="icon">🎮</span>
+        <h3>打游戏</h3>
+        <p>线上嘴强王者，线下沉默寡言。游戏是我少数能放开说话的地方。</p>
+      </div>
+      <div class="hobby-card reveal">
+        <span class="icon">🎵</span>
+        <h3>听歌</h3>
+        <p>歌单比朋友圈精彩。戴上耳机，世界就是我的。</p>
+      </div>
+      <div class="hobby-card reveal">
+        <span class="icon">💻</span>
+        <h3>折腾电脑</h3>
+        <p>正在学 Python 和 C 语言，偶尔和 bug 大战三百回合。</p>
+      </div>
+      <div class="hobby-card reveal">
+        <span class="icon">😴</span>
+        <h3>发呆 &amp; 补觉</h3>
+        <p>社恐的能量守恒定律：白天省下的电，全用来晚上熬夜了。</p>
+      </div>
+      <div class="hobby-card reveal">
+        <span class="icon">🌸</span>
+        <h3>二次元</h3>
+        <p>追番看番、收藏壁纸，偶尔沉迷于纸片人的世界无法自拔。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 社恐数据 -->
+<section>
+  <div class="container">
+    <h2 class="section-title reveal">社恐情况一览</h2>
+    <div class="card reveal">
+      <div class="stats-grid">
+        <div>
+          <div class="stat-num">0 次</div>
+          <div class="stat-label">主动和陌生人搭话</div>
+        </div>
+        <div>
+          <div class="stat-num">3 秒</div>
+          <div class="stat-label">遇到熟人装没看见的反应速度</div>
+        </div>
+        <div>
+          <div class="stat-num">100%</div>
+          <div class="stat-label">但认真起来的完成度</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 底部 -->
+<footer>
+  <div class="line"></div>
+  <p>星洛 · 一个社恐的普通学生</p>
+  <p style="margin-top:8px; opacity:0.6;">这个页面由 AI 协助完成 · 感谢浏览（不用打招呼，看看就好 🙂）</p>
+</footer>
+
+<script>
+  // 打字机效果
+  const lines = [
+    "一个社恐的普通学生",
+    "线上话痨 / 线下静音",
+    "正在学习编程中…",
+    "很高兴你来看我的页面（虽然不会主动打招呼）"
+  ];
+  const typedEl = document.getElementById("typed");
+  let li = 0, ci = 0, deleting = false;
+
+  function typeLoop() {
+    const line = lines[li];
+    typedEl.textContent = line.slice(0, ci);
+    let delay = deleting ? 40 : 110;
+
+    if (!deleting && ci === line.length) {
+      delay = 1800;           // 停留后开始删除
+      deleting = true;
+    } else if (deleting && ci === 0) {
+      deleting = false;
+      li = (li + 1) % lines.length;
+      delay = 400;
+    } else {
+      ci += deleting ? -1 : 1;
+    }
+    setTimeout(typeLoop, delay);
+  }
+  typeLoop();
+
+  // 滚动渐入
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add("visible");
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
