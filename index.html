@@ -977,8 +977,18 @@
     user-select: none;
     touch-action: none;
     filter: drop-shadow(0 10px 24px rgba(0, 10, 30, 0.45));
+    transition: transform 0.45s cubic-bezier(0.33, 0.8, 0.3, 1);
   }
-  .music-player.dragging { cursor: grabbing; }
+  .music-player.dragging { cursor: grabbing; transition: none; }
+  /* 松手贴墙时，位置也平滑过去 */
+  .music-player.snapping { transition: transform 0.45s cubic-bezier(0.33, 0.8, 0.3, 1), left 0.28s ease; }
+  /* 拖到左墙：整体镜像，让唱片朝外，缩进去时露出的也是唱片 */
+  .music-player[data-side="left"] { flex-direction: row-reverse; }
+  .music-player[data-side="left"] .vol-tip { right: auto; left: 0; }
+  /* 自动隐藏：滑进墙里，只露唱片一点点（20px） */
+  .music-player.peek[data-side="right"] { transform: translateX(calc(100% - 20px)); }
+  .music-player.peek[data-side="left"]  { transform: translateX(calc(-100% + 20px)); }
+  .music-player.peek { cursor: pointer; }
 
   /* 唱片 */
   .disc {
@@ -2760,8 +2770,49 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
 
   // 拖动 vs 点击：移动超过 6px 算拖动；原地松手 = 播放/暂停
   let down = false, dragged = false, sx = 0, sy = 0, ox = 0, oy = 0;
+  let poppedOnDown = false;
+
+  // ---- 贴墙 + 3 秒自动隐藏 ----
+  let side = 'right';          // 贴在左墙还是右墙
+  let stowed = false;          // 是否已缩进墙里
+  let hovering = false;
+  let hideTimer = null, showTimer = null;
+
+  // 注意：window.innerWidth 含右侧滚动条宽度，贴墙要用不含滚动条的内容宽度，
+  // 否则缩进去后露出的那一点会藏在滚动条下面，鼠标点不到。
+  const vw = () => document.documentElement.clientWidth;
+
+  const dockX = s => (s === 'left' ? 0 : Math.max(0, vw() - player.offsetWidth));
+  function dock(s) {
+    side = s;
+    player.dataset.side = s;
+    player.style.right = 'auto';
+    player.style.left = dockX(s) + 'px';
+  }
+  function nearestSide() {
+    const r = player.getBoundingClientRect();
+    return (r.left + r.width / 2) < vw() / 2 ? 'left' : 'right';
+  }
+  function stow() {
+    if (down || hovering) return;
+    stowed = true;
+    player.classList.add('peek');
+  }
+  function popOut() {
+    clearTimeout(showTimer);
+    stowed = false;
+    player.classList.remove('peek');
+  }
+  function scheduleStow(delay) {
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(stow, delay || 3000);
+  }
+
   player.addEventListener('pointerdown', e => {
     if (e.button !== undefined && e.button !== 0) return;
+    clearTimeout(hideTimer); clearTimeout(showTimer);
+    poppedOnDown = false;
+    if (stowed) { popOut(); poppedOnDown = true; }   // 缩在墙里时，一按就先弹出来
     down = true; dragged = false;
     sx = e.clientX; sy = e.clientY;
     const r = player.getBoundingClientRect();
@@ -2774,7 +2825,7 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
     dragged = true;
     player.classList.add('dragging');
     const w = player.offsetWidth, h = player.offsetHeight;
-    const nx = Math.min(Math.max(ox + (e.clientX - sx), 8), window.innerWidth - w - 8);
+    const nx = Math.min(Math.max(ox + (e.clientX - sx), 8), vw() - w - 8);
     const ny = Math.min(Math.max(oy + (e.clientY - sy), 8), window.innerHeight - h - 8);
     player.style.left = nx + 'px';
     player.style.top = ny + 'px';
@@ -2784,12 +2835,52 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
     if (!down) return;
     down = false;
     player.classList.remove('dragging');
-    if (!dragged) toggle();
+    if (dragged) {
+      // 拖完自动贴到最近的一侧墙
+      const s = nearestSide();
+      player.classList.add('snapping');
+      dock(s);
+      setTimeout(() => player.classList.remove('snapping'), 340);
+      scheduleStow(3000);
+    } else if (poppedOnDown) {
+      // 只是把它从墙里点出来，不切换播放
+    } else {
+      toggle();
+    }
   });
   player.addEventListener('pointercancel', () => {
     down = false;
     player.classList.remove('dragging');
   });
+
+  // 鼠标悬停：缩在墙里时悬停 2 秒自动弹出
+  player.addEventListener('pointerenter', () => {
+    hovering = true;
+    clearTimeout(hideTimer);
+    if (stowed) showTimer = setTimeout(popOut, 2000);
+  });
+  player.addEventListener('pointerleave', () => {
+    hovering = false;
+    clearTimeout(showTimer);
+    if (!down) scheduleStow(3000);
+  });
+
+  // 窗口尺寸变化时保持贴墙，别飞出屏幕
+  window.addEventListener('resize', () => {
+    if (down) return;
+    player.style.right = 'auto';
+    player.style.left = dockX(side) + 'px';
+    const h = player.offsetHeight;
+    const t = parseFloat(player.style.top) || 0;
+    if (t + h > window.innerHeight - 8) {
+      player.style.top = Math.max(8, window.innerHeight - h - 8) + 'px';
+    }
+  });
+
+  // 初始：贴右墙，静止 3 秒后自动缩进去
+  player.style.top = (parseFloat(getComputedStyle(player).top) || window.innerHeight * 0.24) + 'px';
+  dock('right');
+  scheduleStow(3000);
 })();
 
 /* ==================== 7. 我的小世界：兴趣详情页 ==================== */
