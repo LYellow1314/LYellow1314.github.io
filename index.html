@@ -264,6 +264,99 @@
   .wx-day .lo { opacity: 0.65; font-variant-numeric: tabular-nums; }
   .wx-tip { margin-top: 10px; font-size: 0.72rem; opacity: 0.6; text-align: left; }
 
+  /* ================= 左侧快速翻页列表 ================= */
+  .side-nav-btn {
+    position: fixed;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 56;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 14px;
+    background: rgba(10, 18, 38, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 0.25s ease;
+  }
+  .side-nav-btn:hover { background: rgba(10, 18, 38, 0.68); }
+  .side-nav-btn .tri { font-size: 0.58rem; opacity: 0.75; transition: transform 0.25s ease; }
+  .side-nav-btn.open .tri { transform: rotate(180deg); }
+
+  .side-nav-panel {
+    position: fixed;
+    left: 18px;
+    top: calc(50% + 42px);
+    z-index: 55;
+    width: 172px;
+    max-height: calc(50vh - 20px);
+    overflow: auto;
+    padding: 10px;
+    border-radius: 16px;
+    background: rgba(10, 18, 38, 0.62);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+    pointer-events: none;
+    scrollbar-width: thin;
+  }
+  .side-nav-panel::-webkit-scrollbar { width: 5px; }
+  .side-nav-panel::-webkit-scrollbar-thumb { background: rgba(125, 211, 252, 0.35); border-radius: 3px; }
+  .side-nav-panel.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .side-nav-head { font-size: 0.72rem; opacity: 0.6; margin: 2px 8px 8px; letter-spacing: 1px; }
+  .side-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    color: #e8f4ff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .side-nav-item::before {
+    content: '';
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(125, 211, 252, 0.9);
+    box-shadow: 0 0 8px rgba(125, 211, 252, 0.8);
+  }
+  .side-nav-item:hover { background: rgba(125, 211, 252, 0.14); }
+  .side-nav-item.active { background: rgba(125, 211, 252, 0.18); color: #fff; }
+  .side-nav-item.ascend {
+    margin-top: 6px;
+    justify-content: center;
+    color: #ffd6a5;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .side-nav-item.ascend::before { display: none; }
+  .side-nav-item.ascend:hover { background: rgba(255, 214, 165, 0.14); }
+
   /* 头像：外层做漂浮，内层做悬停放大 */
   .avatar-wrap { animation: bob 4s ease-in-out infinite; margin-bottom: 24px; }
 
@@ -829,6 +922,8 @@
     .wx-panel { min-width: 286px; }
     .wx-now { gap: 12px; font-size: 0.8rem; }
     .hero-clock { font-size: 0.95rem; letter-spacing: 0.5px; }
+    .side-nav-btn { left: 10px; padding: 8px 12px; font-size: 0.8rem; letter-spacing: 1px; }
+    .side-nav-panel { left: 10px; width: 152px; }
     .nav-bubble { width: 96px; height: 96px; font-size: 0.88rem; }
     .hero-bubbles { gap: 14px; margin-top: 36px; }
     .bubble-zone { min-height: 420px; }
@@ -1430,6 +1525,21 @@
 <div class="bg-veil"></div>
 
 <!-- ================= 首屏 ================= -->
+<!-- 左侧快速翻页列表 -->
+<div class="side-nav-btn" id="sideNavBtn" role="button" tabindex="0" aria-label="打开页面列表">
+  ☰ 列表 <span class="tri">▲</span>
+</div>
+<div class="side-nav-panel" id="sideNavPanel">
+  <div class="side-nav-head">页面模块</div>
+  <div class="side-nav-item" data-goto="#top">首页</div>
+  <div class="side-nav-item" data-goto="#about">关于我</div>
+  <div class="side-nav-item" data-goto="#world">我的小世界</div>
+  <div class="side-nav-item" data-goto="#project">项目</div>
+  <div class="side-nav-item" data-goto="#fear">社恐一览</div>
+  <div class="side-nav-item" data-goto="#end">到底啦</div>
+  <div class="side-nav-item ascend" data-goto="#top" title="回到首页">↑升天↑</div>
+</div>
+
 <header class="hero" id="top">
   <canvas id="rain"></canvas>
   <div class="hero-label">——HELLO,NICE TO MEET YOU</div>
@@ -1675,7 +1785,7 @@
   </div>
 </section>
 
-<footer>
+<footer id="end">
   <div class="line"></div>
   <p>星洛 · 一个社恐的普通学生</p>
   <p style="margin-top:8px; opacity:0.6;">这个页面由 AI 协助完成 · 感谢浏览（不用打招呼，看看就好 🙂）</p>
@@ -3158,6 +3268,50 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
     }
     daysEl.innerHTML = html;
   }
+})();
+
+/* ================= 左侧快速翻页列表 ================= */
+(function () {
+  const btn = document.getElementById('sideNavBtn');
+  const panel = document.getElementById('sideNavPanel');
+  if (!btn || !panel) return;
+
+  function setOpen(open) {
+    btn.classList.toggle('open', open);
+    panel.classList.toggle('open', open);
+  }
+  const toggle = () => setOpen(!panel.classList.contains('open'));
+
+  btn.addEventListener('click', toggle);
+  btn.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
+  // 点面板外的地方收起
+  document.addEventListener('click', e => {
+    if (panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)) setOpen(false);
+  });
+
+  // 点击条目：平滑滚到对应区块
+  const items = [...panel.querySelectorAll('[data-goto]')];
+  panel.addEventListener('click', e => {
+    const item = e.target.closest('[data-goto]');
+    if (!item) return;
+    const target = document.querySelector(item.getAttribute('data-goto'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setOpen(false);
+  });
+
+  // 滚动监听：高亮当前所在区块
+  const spy = new IntersectionObserver(es => {
+    es.forEach(en => {
+      if (!en.isIntersecting) return;
+      items.forEach(m => m.classList.toggle('active', m.getAttribute('data-goto') === '#' + en.target.id));
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  ['top', 'about', 'world', 'project', 'fear', 'end'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) spy.observe(el);
+  });
 })();
 </script>
 
