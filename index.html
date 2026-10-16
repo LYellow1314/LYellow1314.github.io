@@ -1112,6 +1112,18 @@
     .vol-btn { font-size: 0.75rem; }
   }
 
+  /* 更窄的手机（如 288~420px）：改成上下排布并再缩一号，
+     缩小横向占用，避免展开时压住右侧那列气泡 */
+  @media (max-width: 420px) {
+    .music-player,
+    .music-player[data-side="left"] { flex-direction: column; gap: 5px; right: 6px; top: 8%; }
+    .disc { width: 46px; height: 46px; }
+    .disc-hint { font-size: 0.72rem; }
+    .vol-ball { width: 26px; height: 26px; }
+    .vol-btn { font-size: 0.68rem; }
+    .vol-tip { top: -30px; font-size: 0.72rem; padding: 3px 9px; }
+  }
+
   /* ================= 小世界：可点击卡片 + 详情页 ================= */
   .hobby-card:nth-child(3) { background: linear-gradient(135deg, #1e5aa8, #0d2b5c); }
   .hobby-card.linkable { cursor: pointer; }
@@ -2786,6 +2798,7 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
   let stowed = false;          // 是否已缩进墙里
   let hovering = false;
   let hideTimer = null, showTimer = null;
+  let lastInteract = Date.now();   // 最近一次操作时间（看门狗用）
 
   // 注意：window.innerWidth 含右侧滚动条宽度，贴墙要用不含滚动条的内容宽度，
   // 否则缩进去后露出的那一点会藏在滚动条下面，鼠标点不到。
@@ -2820,6 +2833,7 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
   player.addEventListener('pointerdown', e => {
     if (e.button !== undefined && e.button !== 0) return;
     clearTimeout(hideTimer); clearTimeout(showTimer);
+    lastInteract = Date.now();
     poppedOnDown = false;
     if (stowed) { popOut(); poppedOnDown = true; }   // 缩在墙里时，一按就先弹出来
     down = true; dragged = false;
@@ -2830,6 +2844,7 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
   });
   player.addEventListener('pointermove', e => {
     if (!down) return;
+    lastInteract = Date.now();
     if (!dragged && Math.hypot(e.clientX - sx, e.clientY - sy) < 6) return;
     dragged = true;
     player.classList.add('dragging');
@@ -2858,19 +2873,54 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
     }
   });
   player.addEventListener('pointercancel', () => {
+    // 手机上拖动时浏览器很可能发 pointercancel 而不是 pointerup（手势被接管）。
+    // 这时也要贴墙、也要重新排定自动收起，否则播放器会一直浮在屏幕中间挡住内容，
+    // 看起来就是"点下面的东西没反应"。
     down = false;
     player.classList.remove('dragging');
+    if (dragged) {
+      player.classList.add('snapping');
+      dock(nearestSide());
+      setTimeout(() => player.classList.remove('snapping'), 340);
+    }
+    lastInteract = Date.now();
+    scheduleStow(1500);
   });
 
+  // 触摸抬起/中断后，悬停标记一律清掉（触摸没有真正的 hover 状态）
+  ['pointerup', 'pointercancel'].forEach(t => player.addEventListener(t, () => {
+    hovering = false;
+    lastInteract = Date.now();
+  }));
+
+  // 兜底看门狗：只要没有再操作、没有悬停、却还是展开状态，就按 3 秒规则收起来。
+  // 任何漏掉的收起路径（丢事件、切换标签页、异常中断）都能被它救回来。
+  setInterval(() => {
+    if (down || hovering || stowed) return;
+    if (Date.now() - lastInteract > 3000) stow();
+  }, 800);
+
+  // 手指/鼠标落到页面别处 → 立刻缩回去，别挡着下面的东西
+  document.addEventListener('pointerdown', e => {
+    if (player.contains(e.target)) return;
+    lastInteract = Date.now();
+    if (!stowed) { clearTimeout(hideTimer); stow(); }
+  }, true);
+
   // 鼠标悬停：缩在墙里时悬停 2 秒自动弹出
-  player.addEventListener('pointerenter', () => {
+  player.addEventListener('pointerenter', e => {
+    // 触摸屏没有"悬停"这回事：如果把它算成悬停，手指抬起后状态会卡住，
+    // 播放器就再也不自动收起了（手机上会一直浮在屏幕上挡内容）。
+    if (e.pointerType === 'touch') return;
     hovering = true;
+    lastInteract = Date.now();
     clearTimeout(hideTimer);
     if (stowed) showTimer = setTimeout(popOut, 2000);
   });
-  player.addEventListener('pointerleave', () => {
+  player.addEventListener('pointerleave', e => {
     hovering = false;
     clearTimeout(showTimer);
+    lastInteract = Date.now();
     if (!down) scheduleStow(3000);
   });
 
