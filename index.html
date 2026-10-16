@@ -357,6 +357,40 @@
   .side-nav-item.ascend::before { display: none; }
   .side-nav-item.ascend:hover { background: rgba(255, 214, 165, 0.14); }
 
+  /* ================= 升天泡泡（从底部水里升上来） ================= */
+  #bubbleRise {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 90;
+  }
+  .rise-bubble {
+    position: absolute;
+    bottom: -70px;
+    left: var(--x);
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 26%,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(205, 240, 255, 0.45) 42%,
+      rgba(130, 195, 255, 0.14) 72%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.45), 0 0 14px rgba(140, 210, 255, 0.32);
+    opacity: 0;
+    animation: riseUp var(--d) cubic-bezier(0.33, 0.7, 0.4, 0.98) forwards;
+    will-change: transform, opacity;
+  }
+  @keyframes riseUp {
+    0%   { transform: translate3d(0, 0, 0) scale(0.55); opacity: 0; }
+    10%  { transform: translate3d(calc(var(--drift) * 0.5), -12vh, 0) scale(0.85); opacity: 0.95; }
+    32%  { transform: translate3d(var(--drift), -34vh, 0) scale(1); opacity: 0.95; }
+    54%  { transform: translate3d(calc(var(--drift) * 0.2), -56vh, 0) scale(1.02); opacity: 0.9; }
+    76%  { transform: translate3d(calc(var(--drift) * -0.6), -80vh, 0) scale(1.06); opacity: 0.85; }
+    100% { transform: translate3d(calc(var(--drift) * -1.2), -128vh, 0) scale(1.14); opacity: 0; }
+  }
+
   /* 头像：外层做漂浮，内层做悬停放大 */
   .avatar-wrap { animation: bob 4s ease-in-out infinite; margin-bottom: 24px; }
 
@@ -1525,6 +1559,9 @@
 <div class="bg-veil"></div>
 
 <!-- ================= 首屏 ================= -->
+<!-- 升天泡泡层 -->
+<div id="bubbleRise" aria-hidden="true"></div>
+
 <!-- 左侧快速翻页列表 -->
 <div class="side-nav-btn" id="sideNavBtn" role="button" tabindex="0" aria-label="打开页面列表">
   ☰ 列表 <span class="tri">▲</span>
@@ -3270,6 +3307,31 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
   }
 })();
 
+/* ================= 升天泡泡：从底部水里冒上来 ================= */
+(function () {
+  const layer = document.getElementById('bubbleRise');
+  if (!layer) return;
+  let last = 0;
+  window.__xlBubbleRise = function (count) {
+    const now = Date.now();
+    if (now - last < 700) return;   // 防止连点刷屏
+    last = now;
+    const n = count || 30;
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement('div');
+      b.className = 'rise-bubble';
+      const size = 9 + Math.random() * 27;
+      b.style.setProperty('--x', (Math.random() * 100).toFixed(2) + 'vw');
+      b.style.setProperty('--s', size.toFixed(1) + 'px');
+      b.style.setProperty('--d', (2.5 + Math.random() * 2.3).toFixed(2) + 's');
+      b.style.setProperty('--drift', ((Math.random() * 2 - 1) * 70).toFixed(0) + 'px');
+      b.style.animationDelay = (Math.random() * 0.55).toFixed(2) + 's';
+      layer.appendChild(b);
+      setTimeout(() => b.remove(), 6200);
+    }
+  };
+})();
+
 /* ================= 左侧快速翻页列表 ================= */
 (function () {
   const btn = document.getElementById('sideNavBtn');
@@ -3298,6 +3360,8 @@ document.getElementById('heroAvatar').addEventListener('click', function () {
     if (!item) return;
     const target = document.querySelector(item.getAttribute('data-goto'));
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // 「↑升天↑」：泡泡从水里升上来
+    if (item.classList.contains('ascend') && window.__xlBubbleRise) window.__xlBubbleRise(30);
     setOpen(false);
   });
 
