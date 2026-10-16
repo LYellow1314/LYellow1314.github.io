@@ -272,9 +272,10 @@
     transform: translateY(-50%);
     z-index: 56;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
+    gap: 3px;
+    padding: 8px 11px;
     border-radius: 14px;
     background: rgba(10, 18, 38, 0.5);
     backdrop-filter: blur(10px);
@@ -283,21 +284,22 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     color: #fff;
     cursor: pointer;
-    font-size: 0.9rem;
     font-weight: 600;
-    letter-spacing: 2px;
+    line-height: 1.1;
     user-select: none;
     -webkit-user-select: none;
     transition: background 0.25s ease;
   }
   .side-nav-btn:hover { background: rgba(10, 18, 38, 0.68); }
-  .side-nav-btn .tri { font-size: 0.58rem; opacity: 0.75; transition: transform 0.25s ease; }
+  .side-nav-btn .bar { font-size: 1rem; letter-spacing: 0; }
+  .side-nav-btn .txt { font-size: 0.68rem; letter-spacing: 1px; }
+  .side-nav-btn .tri { font-size: 0.5rem; opacity: 0.75; transition: transform 0.25s ease; }
   .side-nav-btn.open .tri { transform: rotate(180deg); }
 
   .side-nav-panel {
     position: fixed;
     left: 18px;
-    top: calc(50% + 42px);
+    top: calc(50% + 52px);
     z-index: 55;
     width: 172px;
     max-height: calc(50vh - 20px);
@@ -956,8 +958,10 @@
     .wx-panel { min-width: 286px; }
     .wx-now { gap: 12px; font-size: 0.8rem; }
     .hero-clock { font-size: 0.95rem; letter-spacing: 0.5px; }
-    .side-nav-btn { left: 10px; padding: 8px 12px; font-size: 0.8rem; letter-spacing: 1px; }
-    .side-nav-panel { left: 10px; width: 152px; }
+    .side-nav-btn { left: 10px; padding: 6px 9px; gap: 2px; }
+    .side-nav-btn .bar { font-size: 0.9rem; }
+    .side-nav-btn .txt { font-size: 0.62rem; }
+    .side-nav-panel { left: 10px; width: 152px; top: calc(50% + 46px); }
     .nav-bubble { width: 96px; height: 96px; font-size: 0.88rem; }
     .hero-bubbles { gap: 14px; margin-top: 36px; }
     .bubble-zone { min-height: 420px; }
@@ -1574,7 +1578,9 @@
 
 <!-- 左侧快速翻页列表 -->
 <div class="side-nav-btn" id="sideNavBtn" role="button" tabindex="0" aria-label="打开页面列表">
-  ☰ 列表 <span class="tri">▲</span>
+  <span class="bar">☰</span>
+  <span class="txt">列表</span>
+  <span class="tri">▲</span>
 </div>
 <div class="side-nav-panel" id="sideNavPanel">
   <div class="side-nav-head">页面模块</div>
