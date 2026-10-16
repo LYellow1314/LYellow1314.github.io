@@ -1104,9 +1104,12 @@
   .vol-tip.show { opacity: 1; transform: translateY(0); }
 
   @media (max-width: 560px) {
-    .music-player { right: 12px; top: 18%; }
-    .disc { width: 74px; height: 74px; }
-    .vol-ball { width: 34px; height: 34px; }
+    /* 手机上播放器默认停靠在标题上方，别挡住名字；整体也缩小一号 */
+    .music-player { right: 8px; top: 9%; gap: 6px; }
+    .disc { width: 60px; height: 60px; }
+    .disc-hint { font-size: 0.85rem; }
+    .vol-ball { width: 30px; height: 30px; }
+    .vol-btn { font-size: 0.75rem; }
   }
 
   /* ================= 小世界：可点击卡片 + 详情页 ================= */
